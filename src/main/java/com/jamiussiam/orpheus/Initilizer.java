@@ -8,33 +8,50 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.utils.Compression;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.security.auth.login.LoginException;
+import java.util.List;
 
 @Slf4j
-@Component
+@Configuration
 public class Initilizer {
 
     @Value("${TOKEN}")
     private String TOKEN;
 
-    public JDA getJda(EventListener... eventListeners) throws LoginException {
+    private final List<EventListener> listenerList;
+
+    public Initilizer(List<EventListener> listenerList) {
+        this.listenerList = listenerList;
+    }
+
+    @Bean
+    public JDA getJda() {
         JDABuilder builder = JDABuilder.createDefault(TOKEN);
 
-        // Disable parts of the cache
         builder.disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE);
-        // Enable the bulk delete event
         builder.setBulkDeleteSplittingEnabled(false);
-        // Disable compression (not recommended)
         builder.setCompression(Compression.NONE);
-        // Set activity (like "playing Something")
         builder.setActivity(Activity.playing("Music"));
 
-        if (eventListeners.length != 0) {
-            builder.addEventListeners(eventListeners);
+        if (!listenerList.isEmpty()) {
+            builder.addEventListeners(listenerList.toArray(new EventListener[0]));
         }
 
-        return builder.build();
+        try {
+            JDA jda = builder.build();
+            jda.awaitReady();
+
+            return jda;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (LoginException e) {
+            log.error("Can't login.");
+            e.printStackTrace();
+        }
+
+        throw new IllegalStateException("No JDA can be built.");
     }
 }

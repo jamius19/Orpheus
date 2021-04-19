@@ -5,25 +5,25 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 @Slf4j
-@Component
+@Configuration
 public class Application implements ApplicationRunner {
 
     private final Initilizer initilizer;
 
-    private final List<EventListener> listenerList;
+    private final JDA jda;
 
-    public Application(Initilizer initilizer, List<EventListener> listenerList) {
+    public Application(Initilizer initilizer, List<EventListener> listenerList, JDA jda) {
         this.initilizer = initilizer;
-        this.listenerList = listenerList;
+        this.jda = jda;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        JDA jda = initilizer.getJda(listenerList.toArray(new EventListener[0]));
+
     }
 }
