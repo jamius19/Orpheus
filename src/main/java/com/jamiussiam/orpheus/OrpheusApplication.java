@@ -9,5 +9,4 @@ public class OrpheusApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OrpheusApplication.class, args);
 	}
-
 }
