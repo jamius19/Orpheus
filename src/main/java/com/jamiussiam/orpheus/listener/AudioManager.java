@@ -18,13 +18,13 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class AudioConnectListener {
+public class AudioManager {
 
     private final AudioPlayerManager playerManager;
 
     private final Map<Long, GuildMusicManager> musicManagers;
 
-    public AudioConnectListener() {
+    public AudioManager() {
         playerManager = new DefaultAudioPlayerManager();
         musicManagers = new HashMap<>();
 
@@ -46,7 +46,9 @@ public class AudioConnectListener {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-
+                if (!playlist.getTracks().isEmpty()) {
+                    guildMusicManager.getScheduler().addPlaylist(playlist);
+                }
             }
 
             @Override
@@ -59,6 +61,11 @@ public class AudioConnectListener {
 
             }
         });
+    }
+
+    public void stopPlayer(Guild guild) {
+        musicManagers.get(guild.getIdLong()).getPlayer().stopTrack();
+        musicManagers.get(guild.getIdLong()).getScheduler().clearQueue();
     }
 
     private GuildMusicManager getGuildMusicManager(Guild guild) {

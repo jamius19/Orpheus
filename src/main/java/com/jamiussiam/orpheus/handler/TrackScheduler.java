@@ -2,6 +2,7 @@ package com.jamiussiam.orpheus.handler;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,13 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void add(AudioTrack track) {
-        audioPlayer.startTrack(track, false);
+        queue.add(track);
+        audioPlayer.startTrack(queue.poll(), true);
+    }
+
+    public void addPlaylist(AudioPlaylist playlist) {
+        queue.addAll(playlist.getTracks());
+        audioPlayer.startTrack(queue.poll(), true);
     }
 
     public void nextTrack() {
@@ -46,5 +53,9 @@ public class TrackScheduler extends AudioEventAdapter {
         if (endReason.mayStartNext) {
             nextTrack();
         }
+    }
+
+    public void clearQueue() {
+        queue.clear();
     }
 }
