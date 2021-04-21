@@ -12,13 +12,10 @@ import java.util.List;
 @Slf4j
 @Configuration
 public class Application implements ApplicationRunner {
-
-    private final Initilizer initilizer;
-
+    
     private final JDA jda;
 
-    public Application(Initilizer initilizer, List<EventListener> listenerList, JDA jda) {
-        this.initilizer = initilizer;
+    public Application(List<EventListener> listenerList, JDA jda) {
         this.jda = jda;
     }
 

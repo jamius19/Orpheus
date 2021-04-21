@@ -1,5 +1,6 @@
 package com.jamiussiam.orpheus.listener;
 
+import com.jamiussiam.orpheus.model.GlobalValues;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -9,13 +10,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static com.jamiussiam.orpheus.model.BotCommands.BOT_DISCONNECT;
+import static com.jamiussiam.orpheus.model.BotCommands.BOT_PLAY;
+
 @Slf4j
 @Component
 public class CommandListener extends ListenerAdapter {
 
     private final AudioConnectListener audioConnectListener;
-
-    private static final String CHANNEL_NOT_FOUND_TEXT = "```diff\n- You have to be in a voice channel to use Orpheus!\n```";
 
     public CommandListener(AudioConnectListener audioConnectListener) {
         this.audioConnectListener = audioConnectListener;
@@ -27,22 +29,24 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
-        String message = event.getMessage().getContentDisplay();
+        String query = event.getMessage().getContentDisplay();
 
-        if (message.startsWith("op")) {
-            message = message.substring(2);
+        if (BOT_PLAY.isCommandGiven(query)) {
+            query = BOT_PLAY.getFilteredQuery(query);
+            log.info(query);
 
             boolean userInChannel = userInChannel(event.getMember());
 
             if (userInChannel) {
-                audioConnectListener.connect(event.getMember().getVoiceState().getChannel(),
-                        event.getGuild(),
-                        event.getMember());
+                log.info("Query Received!");
+                audioConnectListener.handleQuery(event, query);
             } else {
                 event.getChannel()
-                        .sendMessage(CHANNEL_NOT_FOUND_TEXT)
+                        .sendMessage(GlobalValues.CHANNEL_NOT_FOUND_TEXT)
                         .queue();
             }
+        } else if (BOT_DISCONNECT.isCommandGiven(query)) {
+            event.getGuild().getAudioManager().closeAudioConnection();
         }
     }
 
