@@ -1,6 +1,6 @@
-package com.jamiussiam.orpheus.listener;
+package com.jamiussiam.orpheus.manager;
 
-import com.jamiussiam.orpheus.model.GlobalValues;
+import com.jamiussiam.orpheus.misc.Utils;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 import static com.jamiussiam.orpheus.model.BotCommands.*;
+import static com.jamiussiam.orpheus.model.GlobalValues.*;
 
 @Slf4j
 @Component
@@ -42,13 +43,20 @@ public class CommandListener extends ListenerAdapter {
                 audioManager.handleQuery(event, query);
             } else {
                 event.getChannel()
-                        .sendMessage(GlobalValues.CHANNEL_NOT_FOUND_TEXT)
+                        .sendMessage(CHANNEL_NOT_FOUND_TEXT)
                         .queue();
             }
         } else if (BOT_SKIP.isCommandGiven(query)) {
-            audioManager.getMusicManagers().get(event.getGuild().getIdLong()).getScheduler().nextTrack();
+            GuildMusicManager guildMusicManager = audioManager.getMusicManagers().get(event.getGuild().getIdLong());
+
+            Utils.doIfGuildMusicManagerAvilable(event.getChannel(),
+                    NO_MUSIC_PLAYING,
+                    () -> Utils.doIfPredicate(() -> guildMusicManager.getScheduler().isNextTrackAvailable(),
+                            event.getChannel(),
+                            NEXT_TRACK_NOT_AVAILABLE,
+                            () -> guildMusicManager.getScheduler().nextTrack()));
         } else if (BOT_DISCONNECT.isCommandGiven(query)) {
-            stopPlaying(event.getGuild());
+            disconnect(event.getGuild());
         }
     }
 
@@ -56,11 +64,11 @@ public class CommandListener extends ListenerAdapter {
     public void onGuildVoiceLeave(@NotNull GuildVoiceLeaveEvent event) {
         // Self Disconnected
         if (event.getMember().getUser().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
-            stopPlaying(event.getGuild());
+            disconnect(event.getGuild());
         }
     }
 
-    private void stopPlaying(Guild guild) {
+    private void disconnect(Guild guild) {
         guild.getAudioManager().closeAudioConnection();
         audioManager.stopPlayer(guild);
     }

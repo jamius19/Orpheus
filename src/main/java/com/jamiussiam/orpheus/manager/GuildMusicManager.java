@@ -1,5 +1,7 @@
-package com.jamiussiam.orpheus.handler;
+package com.jamiussiam.orpheus.manager;
 
+import com.jamiussiam.orpheus.handler.MusicHandler;
+import com.jamiussiam.orpheus.misc.TrackScheduler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 

@@ -1,4 +1,4 @@
-package com.jamiussiam.orpheus.handler;
+package com.jamiussiam.orpheus.misc;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -58,5 +59,9 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void clearQueue() {
         queue.clear();
+    }
+
+    public boolean isNextTrackAvailable() {
+        return Objects.nonNull(queue.peek());
     }
 }
