@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -64,8 +65,10 @@ public class AudioManager {
     }
 
     public void stopPlayer(Guild guild) {
-        musicManagers.get(guild.getIdLong()).getPlayer().stopTrack();
-        musicManagers.get(guild.getIdLong()).getScheduler().clearQueue();
+        if (Objects.nonNull(musicManagers.get(guild.getIdLong()))) {
+            musicManagers.get(guild.getIdLong()).getPlayer().stopTrack();
+            musicManagers.get(guild.getIdLong()).getScheduler().clearQueue();
+        }
     }
 
     private GuildMusicManager getGuildMusicManager(Guild guild) {
@@ -77,5 +80,9 @@ public class AudioManager {
 
             return guildMusicManager;
         }
+    }
+
+    public Map<Long, GuildMusicManager> getMusicManagers() {
+        return musicManagers;
     }
 }

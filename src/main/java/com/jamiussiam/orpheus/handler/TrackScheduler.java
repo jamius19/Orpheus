@@ -13,27 +13,28 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Slf4j
 public class TrackScheduler extends AudioEventAdapter {
 
-    private final AudioPlayer audioPlayer;
+    private final AudioPlayer player;
 
     private final Queue<AudioTrack> queue;
 
-    public TrackScheduler(AudioPlayer audioPlayer) {
-        this.audioPlayer = audioPlayer;
+    public TrackScheduler(AudioPlayer player) {
+        this.player = player;
         queue = new LinkedBlockingQueue<>();
     }
 
     public void add(AudioTrack track) {
-        queue.add(track);
-        audioPlayer.startTrack(queue.poll(), true);
+        if (!player.startTrack(track, true)) {
+            queue.add(track);
+        }
     }
 
     public void addPlaylist(AudioPlaylist playlist) {
         queue.addAll(playlist.getTracks());
-        audioPlayer.startTrack(queue.poll(), true);
+        player.startTrack(queue.poll(), true);
     }
 
     public void nextTrack() {
-        audioPlayer.startTrack(queue.poll(), false);
+        player.startTrack(queue.poll(), false);
     }
 
     @Override

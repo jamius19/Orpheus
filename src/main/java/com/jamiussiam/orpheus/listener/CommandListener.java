@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static com.jamiussiam.orpheus.model.BotCommands.BOT_DISCONNECT;
-import static com.jamiussiam.orpheus.model.BotCommands.BOT_PLAY;
+import static com.jamiussiam.orpheus.model.BotCommands.*;
 
 @Slf4j
 @Component
@@ -46,6 +45,8 @@ public class CommandListener extends ListenerAdapter {
                         .sendMessage(GlobalValues.CHANNEL_NOT_FOUND_TEXT)
                         .queue();
             }
+        } else if (BOT_SKIP.isCommandGiven(query)) {
+            audioManager.getMusicManagers().get(event.getGuild().getIdLong()).getScheduler().nextTrack();
         } else if (BOT_DISCONNECT.isCommandGiven(query)) {
             stopPlaying(event.getGuild());
         }

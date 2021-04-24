@@ -2,7 +2,7 @@ package com.jamiussiam.orpheus.model;
 
 public enum BotCommands {
 
-    BOT_PLAY("p"), BOT_DISCONNECT("dc");
+    BOT_PLAY("p"), BOT_DISCONNECT("dc"), BOT_SKIP("skip");
 
     private final String value;
 
