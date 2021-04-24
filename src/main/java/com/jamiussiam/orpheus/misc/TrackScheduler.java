@@ -1,5 +1,6 @@
 package com.jamiussiam.orpheus.misc;
 
+import com.jamiussiam.orpheus.model.AudioTrackQueue;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
@@ -7,25 +8,23 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Objects;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 @Slf4j
 public class TrackScheduler extends AudioEventAdapter {
 
     private final AudioPlayer player;
 
-    private final Queue<AudioTrack> queue;
+    private final AudioTrackQueue queue;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
-        queue = new LinkedBlockingQueue<>();
+        queue = new AudioTrackQueue();
     }
 
     public void add(AudioTrack track) {
-        if (!player.startTrack(track, true)) {
-            queue.add(track);
+        queue.add(track);
+
+        if (player.startTrack(track, true)) {
+            queue.poll();
         }
     }
 
@@ -62,6 +61,14 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public boolean isNextTrackAvailable() {
-        return Objects.nonNull(queue.peek());
+        return queue.isNextTrackAvailable();
+    }
+
+    public boolean isLooping() {
+        return queue.isLooping();
+    }
+
+    public void setLooping(boolean looping) {
+        queue.setLooping(looping);
     }
 }

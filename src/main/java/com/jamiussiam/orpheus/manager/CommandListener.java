@@ -32,6 +32,7 @@ public class CommandListener extends ListenerAdapter {
         }
 
         String query = event.getMessage().getContentDisplay();
+        GuildMusicManager guildMusicManager = audioManager.getGuildMusicManager(event.getGuild());
 
         if (BOT_PLAY.isCommandGiven(query)) {
             query = BOT_PLAY.getFilteredQuery(query);
@@ -39,7 +40,6 @@ public class CommandListener extends ListenerAdapter {
             boolean userInChannel = userInChannel(event.getMember());
 
             if (userInChannel) {
-                log.info("Query Received!");
                 audioManager.handleQuery(event, query);
             } else {
                 event.getChannel()
@@ -47,16 +47,22 @@ public class CommandListener extends ListenerAdapter {
                         .queue();
             }
         } else if (BOT_SKIP.isCommandGiven(query)) {
-            GuildMusicManager guildMusicManager = audioManager.getMusicManagers().get(event.getGuild().getIdLong());
 
             Utils.doIfGuildMusicManagerAvilable(event.getChannel(),
                     NO_MUSIC_PLAYING,
                     () -> Utils.doIfPredicate(() -> guildMusicManager.getScheduler().isNextTrackAvailable(),
                             event.getChannel(),
                             NEXT_TRACK_NOT_AVAILABLE,
-                            () -> guildMusicManager.getScheduler().nextTrack()));
+                            () -> {
+                                guildMusicManager.getEventListener().setTextChannel(event.getChannel());
+                                guildMusicManager.getScheduler().nextTrack();
+                            }));
         } else if (BOT_DISCONNECT.isCommandGiven(query)) {
+            event.getMessage().addReaction("U+23F9").queue();
             disconnect(event.getGuild());
+        } else if (BOT_LOOP.isCommandGiven(query)) {
+            guildMusicManager.getScheduler().setLooping(true);
+            event.getMessage().addReaction("U+1F501").queue();
         }
     }
 
